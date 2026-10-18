@@ -1,0 +1,37 @@
+:root {
+  /* Colors (DESIGN.md §2.1) */
+  --blue: #2ea8ff;
+  --action-blue: #0a6fc2;
+  --red: #ff3b30;
+  --yellow: #ffd60a;
+  --green: #34d058;
+  --charcoal: #111318;
+  --light-gray: #f4f5f7;
+  --white: #ffffff;
+  --gray-border: #d9dce1;
+  --muted-text: #4a4f59;
+  --yellow-soft: #fff3c4;
+
+  /* Spacing (8px system) */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+
+  /* Radii */
+  --radius-tile: 20px;
+  --radius-card: 16px;
+  --radius-button: 12px;
+
+  /* Shadows */
+  --shadow-soft: 0 2px 6px rgba(17, 19, 24, 0.08);
+  --shadow-tile: 0 4px 0 rgba(17, 19, 24, 0.12);
+
+  /* Typography */
+  --font-family: 'Rubik', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+  --fs-h1: 32px;
+  --fs-h2: 24px;
+  --fs-body: 16px;
+  --fs-caption: 14px;
+  --fs-button: 16px;
+}

@@ -1,0 +1,244 @@
+/* ---------- Top bar ---------- */
+.topbar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border-block-end: 1px solid var(--gray-border);
+}
+
+.topbar > :first-child {
+  justify-self: start;
+}
+
+.topbar > :last-child {
+  justify-self: end;
+}
+
+.topbar__title {
+  font-size: var(--fs-h2);
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+  outline: none;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: var(--radius-button);
+  font-size: var(--fs-button);
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    transform 80ms ease;
+}
+
+.btn:focus-visible,
+.tile:focus-visible {
+  outline: 3px solid var(--action-blue);
+  outline-offset: 3px;
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+}
+
+.btn--primary {
+  border: 2px solid var(--charcoal);
+  background: var(--action-blue);
+  color: var(--white);
+  font-weight: 700;
+  box-shadow: var(--shadow-soft);
+}
+
+.btn--primary:active:not(:disabled) {
+  background: #2585d3;
+}
+
+.btn--primary:disabled {
+  background: #c9ccd2;
+  border-color: #c9ccd2;
+  color: var(--white);
+}
+
+.btn--secondary {
+  border: 1.5px solid var(--gray-border);
+  background: var(--white);
+  color: var(--charcoal);
+  box-shadow: var(--shadow-soft);
+}
+
+.btn--secondary:active {
+  background: var(--light-gray);
+}
+
+.btn--small {
+  padding-inline: var(--space-2);
+}
+
+.btn--icon {
+  padding: 0 var(--space-1);
+}
+
+.btn--dark {
+  border: 2px solid var(--charcoal);
+  background: var(--charcoal);
+  color: var(--white);
+  font-weight: 700;
+}
+
+.btn--dark:disabled {
+  opacity: 0.55;
+}
+
+.btn--block {
+  width: 100%;
+  min-height: 56px;
+}
+
+/* ---------- Status box ---------- */
+.status {
+  padding: var(--space-2);
+  border-radius: var(--radius-card);
+  background: #eceef1;
+  text-align: center;
+}
+
+.status__message {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* ---------- Game board ---------- */
+.board {
+  /* Fixed physical layout: blue/red on top, yellow/green below, regardless of RTL. */
+  direction: ltr;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin-block: var(--space-1);
+}
+
+.tile {
+  aspect-ratio: 1;
+  min-width: 0;
+  border: 2px solid var(--charcoal);
+  border-radius: var(--radius-tile);
+  box-shadow: var(--shadow-tile);
+  color: var(--charcoal);
+  font-size: var(--fs-h2);
+  font-weight: 700;
+  direction: rtl;
+  cursor: pointer;
+  transition:
+    box-shadow 120ms ease,
+    filter 120ms ease;
+}
+
+.tile:disabled {
+  cursor: default;
+}
+
+.tile--blue {
+  background: var(--blue);
+}
+
+.tile--red {
+  background: var(--red);
+}
+
+.tile--yellow {
+  background: var(--yellow);
+}
+
+.tile--green {
+  background: var(--green);
+}
+
+/* Lit state, used by the sequence playback from Milestone 2. */
+.tile--lit {
+  filter: brightness(1.15) saturate(1.1);
+  box-shadow:
+    inset 0 0 0 5px rgba(255, 255, 255, 0.95),
+    0 0 0 3px var(--charcoal),
+    0 0 18px 4px rgba(255, 255, 255, 0.6);
+}
+
+/* ---------- About cards ---------- */
+.content--about {
+  padding-block-end: var(--space-4);
+}
+
+.card {
+  padding: var(--space-2);
+  border-radius: var(--radius-card);
+  background: var(--white);
+  box-shadow: var(--shadow-soft);
+  text-align: start;
+}
+
+.card__title {
+  margin-block-end: var(--space-1);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.card p,
+.card li {
+  color: var(--muted-text);
+}
+
+.steps {
+  padding-inline-start: var(--space-3);
+}
+
+.card--best {
+  background: var(--yellow-soft);
+  text-align: center;
+}
+
+.best__value {
+  font-size: var(--fs-h1);
+  font-weight: 700;
+}
+
+.card--best .best__value {
+  color: var(--charcoal);
+  font-size: var(--fs-h2);
+}
+
+.stats {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding-block: var(--space-1);
+  border-block-end: 1px solid var(--light-gray);
+}
+
+.stat-row:last-child {
+  border-block-end: none;
+}
+
+.stat-row dd {
+  font-weight: 500;
+}
+
+.empty {
+  font-size: var(--fs-caption);
+}
