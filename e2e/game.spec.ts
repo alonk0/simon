@@ -82,3 +82,21 @@ test('reloading mid-game returns to the initial state', async ({ page }) => {
   await expect(status(page)).toHaveText('לחץ על התחל');
   await expect(startButton(page)).toBeVisible();
 });
+
+test('fast repeated taps on the same tile count once each, without zooming', async ({ page }) => {
+  await startButton(page).tap();
+  await waitForTurn(page);
+  await tile(page, 'blue').tap();
+  await expect(status(page)).toContainText('שלב 2 מתוך 10');
+  await waitForTurn(page);
+  // Round 2 is blue, blue: two quick taps must register as exactly two presses.
+  await tile(page, 'blue').tap();
+  await tile(page, 'blue').tap();
+  await expect(status(page)).toContainText('שלב 3 מתוך 10');
+  expect(await page.evaluate(() => window.visualViewport?.scale ?? 1)).toBe(1);
+
+  // A mouse click (no touch) still presses the tile.
+  await waitForTurn(page);
+  for (let i = 0; i < 3; i++) await tile(page, 'blue').click();
+  await expect(status(page)).toContainText('שלב 4 מתוך 10');
+});

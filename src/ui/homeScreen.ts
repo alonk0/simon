@@ -58,6 +58,16 @@ export function createHomeScreen(nav: Navigation, controller: GameController, so
         COLOR_LABELS[color],
       ]);
       tile.addEventListener('click', () => controller.press(color));
+      // iOS ignores `touch-action` for fast repeated taps and zooms the page.
+      // Cancelling touchend blocks the zoom (and the synthetic click), so the
+      // press is handled here — only if the finger is still on the tile.
+      tile.addEventListener('touchend', (event) => {
+        event.preventDefault();
+        const touch = event.changedTouches[0];
+        if (touch && tile.contains(document.elementFromPoint(touch.clientX, touch.clientY))) {
+          controller.press(color);
+        }
+      });
       tiles.set(color, tile);
       return tile;
     }),
