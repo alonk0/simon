@@ -10,3 +10,11 @@ export const COLOR_LABELS: Readonly<Record<Color, string>> = {
   yellow: 'צהוב',
   green: 'ירוק',
 };
+
+// Distinct tone per color (Hz), based on the classic Simon pitches.
+export const COLOR_TONES: Readonly<Record<Color, number>> = {
+  green: 415,
+  red: 310,
+  yellow: 252,
+  blue: 209,
+};

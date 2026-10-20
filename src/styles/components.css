@@ -109,15 +109,46 @@
 
 /* ---------- Status box ---------- */
 .status {
+  border: 1.5px solid transparent;
   padding: var(--space-2);
   border-radius: var(--radius-card);
   background: #eceef1;
   text-align: center;
 }
 
-.status__message {
+.status__round {
   font-size: 20px;
   font-weight: 700;
+}
+
+.status__message {
+  min-height: 1.5em;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.status__round + .status__message {
+  font-size: var(--fs-body);
+}
+
+/* Watching the sequence: light blue box, as in the mockup. */
+.status--watch {
+  border: 1.5px solid #9fd3fb;
+  background: #eaf5ff;
+}
+
+.status--watch .status__message {
+  color: var(--action-blue);
+}
+
+/* Player's turn: emphasize "תורך!". */
+.status--turn {
+  border: 1.5px solid var(--charcoal);
+  background: var(--white);
+}
+
+.status--turn .status__message {
+  font-size: 20px;
 }
 
 /* ---------- Game board ---------- */
@@ -241,4 +272,39 @@
 
 .empty {
   font-size: var(--fs-caption);
+}
+
+/* ---------- End-of-game modal ---------- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3);
+  background: rgba(17, 19, 24, 0.55);
+}
+
+.modal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+  max-width: 360px;
+  padding: var(--space-3);
+  border: 1.5px solid var(--charcoal);
+  border-radius: var(--radius-card);
+  background: var(--white);
+  box-shadow: 0 8px 24px rgba(17, 19, 24, 0.25);
+  text-align: center;
+}
+
+.modal__title {
+  font-size: var(--fs-h1);
+  font-weight: 700;
+}
+
+.modal__text {
+  font-size: 20px;
 }

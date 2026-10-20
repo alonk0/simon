@@ -1,11 +1,21 @@
-import { BOARD_LAYOUT, COLOR_LABELS } from '../game/colors';
+import type { Sound } from '../audio/sound';
+import { BOARD_LAYOUT, COLOR_LABELS, type Color } from '../game/colors';
+import type { GameController, GameState } from '../game/gameController';
+import { MAX_ROUNDS } from '../game/sequence';
 import type { Navigation } from '../navigation';
 import { el } from './dom';
 import { soundOffIcon, soundOnIcon } from './icons';
 
-export function createHomeScreen(nav: Navigation): HTMLElement {
-  let muted = false;
+export type HomeScreen = {
+  element: HTMLElement;
+  render(state: GameState): void;
+};
 
+function completedText(rounds: number): string {
+  return rounds === 1 ? 'השלמת שלב אחד' : `השלמת ${rounds} שלבים`;
+}
+
+export function createHomeScreen(nav: Navigation, controller: GameController, sound: Sound): HomeScreen {
   const muteButton = el('button', {
     type: 'button',
     class: 'btn btn--secondary btn--icon',
@@ -13,12 +23,13 @@ export function createHomeScreen(nav: Navigation): HTMLElement {
     'aria-label': 'השתק צלילים',
   });
   const renderMute = () => {
+    const muted = sound.isMuted();
     muteButton.replaceChildren(muted ? soundOffIcon() : soundOnIcon());
     muteButton.setAttribute('aria-pressed', String(muted));
     muteButton.setAttribute('aria-label', muted ? 'הפעל צלילים' : 'השתק צלילים');
   };
   muteButton.addEventListener('click', () => {
-    muted = !muted;
+    sound.setMuted(!sound.isMuted());
     renderMute();
   });
   renderMute();
@@ -33,25 +44,87 @@ export function createHomeScreen(nav: Navigation): HTMLElement {
     muteButton,
   ]);
 
-  const status = el('div', { class: 'status', 'aria-live': 'polite' }, [
-    el('p', { class: 'status__message' }, ['לחץ על התחל']),
-  ]);
+  const roundLine = el('p', { class: 'status__round' });
+  const messageLine = el('p', { class: 'status__message' });
+  const status = el('div', { class: 'status', 'aria-live': 'polite' }, [roundLine, messageLine]);
 
-  // Tiles stay disabled until the game logic exists (Milestone 2).
+  const tiles = new Map<Color, HTMLButtonElement>();
   const board = el(
     'div',
     { class: 'board', role: 'group', 'aria-label': 'לוח המשחק' },
-    BOARD_LAYOUT.map((color) =>
-      el('button', { type: 'button', class: `tile tile--${color}`, 'data-color': color, disabled: true }, [
+    BOARD_LAYOUT.map((color) => {
+      const tile = el('button', { type: 'button', class: `tile tile--${color}`, 'data-color': color, disabled: true }, [
         COLOR_LABELS[color],
-      ]),
-    ),
+      ]);
+      tile.addEventListener('click', () => controller.press(color));
+      tiles.set(color, tile);
+      return tile;
+    }),
   );
 
-  const startButton = el('button', { type: 'button', class: 'btn btn--primary btn--block' }, ['התחל']);
+  const startGame = () => {
+    sound.unlock();
+    controller.start();
+  };
 
-  return el('section', { class: 'screen screen--home', 'data-screen': 'home' }, [
+  const startButton = el('button', { type: 'button', class: 'btn btn--primary btn--block' }, ['התחל']);
+  startButton.addEventListener('click', startGame);
+
+  // End-of-game modal (an overlay inside the home screen, not a separate screen).
+  const resultTitle = el('h2', { class: 'modal__title', id: 'result-title' });
+  const resultRounds = el('p', { class: 'modal__text' });
+  const playAgainButton = el('button', { type: 'button', class: 'btn btn--primary btn--block' }, ['שחק שוב']);
+  playAgainButton.addEventListener('click', startGame);
+  const modal = el('div', { class: 'overlay', hidden: true }, [
+    el('div', { class: 'modal', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'result-title' }, [
+      resultTitle,
+      resultRounds,
+      playAgainButton,
+    ]),
+  ]);
+
+  const element = el('section', { class: 'screen screen--home', 'data-screen': 'home' }, [
     header,
     el('main', { class: 'content content--home' }, [status, board, startButton]),
+    modal,
   ]);
+
+  function render(state: GameState): void {
+    const { phase } = state;
+    const inGame = phase !== 'idle';
+
+    roundLine.hidden = !inGame;
+    roundLine.textContent = inGame ? `שלב ${state.round} מתוך ${MAX_ROUNDS}` : '';
+    const message =
+      phase === 'idle'
+        ? 'לחץ על התחל'
+        : phase === 'showing-sequence'
+          ? 'צפה ברצף'
+          : phase === 'awaiting-input'
+            ? 'תורך!'
+            : '';
+    if (messageLine.textContent !== message) messageLine.textContent = message;
+    status.classList.toggle('status--watch', phase === 'showing-sequence');
+    status.classList.toggle('status--turn', phase === 'awaiting-input');
+
+    for (const [color, tile] of tiles) {
+      tile.disabled = phase !== 'awaiting-input';
+      tile.classList.toggle('tile--lit', state.litColor === color);
+    }
+
+    startButton.hidden = inGame;
+
+    const showModal = phase === 'finished';
+    if (showModal && modal.hidden) {
+      resultTitle.textContent = state.result === 'win' ? 'ניצחת! 🎉' : 'הפסדת';
+      resultRounds.textContent = completedText(state.completedRounds);
+      modal.hidden = false;
+      playAgainButton.focus();
+    } else if (!showModal) {
+      modal.hidden = true;
+    }
+  }
+
+  render(controller.getState());
+  return { element, render };
 }
