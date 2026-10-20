@@ -43,10 +43,11 @@ const controller = createGameController({
   onFinish: recordFinishedGame,
 });
 home = createHomeScreen(nav, controller, sound);
+const about = createAboutScreen(nav, results);
 
 const screens: Record<Screen, HTMLElement> = {
   home: home.element,
-  about: createAboutScreen(nav),
+  about: about.element,
 };
 
 function show(screen: Screen): void {
@@ -56,6 +57,9 @@ function show(screen: Screen): void {
 nav.onNavigate((screen, previous) => {
   // Leaving home cancels the active game without saving anything.
   if (previous === 'home') controller.cancel();
+  // Re-read saved results on every visit so About always matches storage.
+  if (screen === 'about') about.render();
+  else about.closeDialog();
   show(screen);
   window.scrollTo(0, 0);
   screens[screen].querySelector<HTMLElement>('h1')?.focus({ preventScroll: true });

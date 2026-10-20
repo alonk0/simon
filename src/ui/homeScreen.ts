@@ -1,6 +1,7 @@
 import type { Sound } from '../audio/sound';
 import { BOARD_LAYOUT, COLOR_LABELS, type Color } from '../game/colors';
 import type { GameController, GameState } from '../game/gameController';
+import { roundsLabel } from '../game/history';
 import { MAX_ROUNDS } from '../game/sequence';
 import type { Navigation } from '../navigation';
 import { el } from './dom';
@@ -12,7 +13,7 @@ export type HomeScreen = {
 };
 
 function completedText(rounds: number): string {
-  return rounds === 1 ? 'השלמת שלב אחד' : `השלמת ${rounds} שלבים`;
+  return `השלמת ${roundsLabel(rounds)}`;
 }
 
 export function createHomeScreen(nav: Navigation, controller: GameController, sound: Sound): HomeScreen {
