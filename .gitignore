@@ -80,3 +80,6 @@ desktop.ini
 tmp/
 temp/
 *.tmp
+
+# --- PWA dev output ---
+dev-dist/

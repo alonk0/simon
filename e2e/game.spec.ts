@@ -5,7 +5,7 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     Math.random = () => 0;
   });
-  await page.goto('/');
+  await page.goto('./');
 });
 
 const status = (page: Page) => page.locator('.status');

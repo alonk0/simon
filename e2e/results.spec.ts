@@ -37,7 +37,7 @@ async function savedGames(page: Page) {
 }
 
 test('finished games are saved once and a new record shows only on a real improvement', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('./');
   await loseAfter(page, 0);
   await expect(dialog(page)).toContainText('שיא אישי: 0');
   await expect(dialog(page).getByText('שיא חדש!')).toBeHidden();
@@ -66,7 +66,7 @@ test('finished games are saved once and a new record shows only on a real improv
 });
 
 test('abandoned games are never saved', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('./');
   await startButton(page).tap();
   await waitForTurn(page);
   await page.getByRole('button', { name: 'אודות' }).tap();
@@ -84,7 +84,7 @@ test('blocked storage does not break the game or claim a save', async ({ page })
       throw new DOMException('blocked', 'QuotaExceededError');
     };
   });
-  await page.goto('/');
+  await page.goto('./');
   await loseAfter(page, 1);
   await expect(dialog(page)).toContainText('הפסדת');
   await expect(dialog(page)).toContainText('התוצאה לא נשמרה במכשיר');
@@ -101,7 +101,7 @@ test('corrupted saved data keeps the game working and is not overwritten', async
       sessionStorage.setItem('seeded', '1');
     }
   }, KEY);
-  await page.goto('/');
+  await page.goto('./');
   await loseAfter(page, 0);
   await expect(dialog(page)).toContainText('הפסדת');
   await expect(dialog(page)).toContainText('התוצאה לא נשמרה במכשיר');

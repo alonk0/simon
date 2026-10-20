@@ -50,14 +50,14 @@ const seeded: Game[] = [
 
 test('empty history shows non-misleading empty states', async ({ page }) => {
   await seed(page, null);
-  await page.goto('/');
+  await page.goto('./');
   await openAbout(page);
   await expectEmpty(page);
 });
 
 test('statistics and history match saved games, newest first, date only', async ({ page }) => {
   await seed(page, games(seeded));
-  await page.goto('/');
+  await page.goto('./');
   await openAbout(page);
   await expect(page.getByTestId('best')).toHaveText('10');
   await expect(page.getByTestId('total')).toHaveText('3');
@@ -74,7 +74,7 @@ test('statistics and history match saved games, newest first, date only', async 
 
 test('a just-finished game appears at the top; an abandoned game is not added', async ({ page }) => {
   await seed(page, games(seeded));
-  await page.goto('/');
+  await page.goto('./');
   await button(page, 'התחל').tap();
   await expect(status(page)).toContainText('תורך!', { timeout: 15_000 });
   await tile(page, 'red').tap();
@@ -97,7 +97,7 @@ test('a just-finished game appears at the top; an abandoned game is not added', 
 
 test('cancelling the reset dialog changes nothing', async ({ page }) => {
   await seed(page, games(seeded));
-  await page.goto('/');
+  await page.goto('./');
   await openAbout(page);
   await button(page, 'איפוס נתונים').tap();
   await expect(resetDialog(page)).toBeVisible();
@@ -117,7 +117,7 @@ test('cancelling the reset dialog changes nothing', async ({ page }) => {
 test('confirming the reset clears everything immediately and after reload', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('other-app', 'keep'));
   await seed(page, games(seeded));
-  await page.goto('/');
+  await page.goto('./');
   await openAbout(page);
   await button(page, 'איפוס נתונים').tap();
   await resetDialog(page).getByRole('button', { name: 'איפוס', exact: true }).tap();
@@ -133,7 +133,7 @@ test('confirming the reset clears everything immediately and after reload', asyn
 
 test('corrupted data shows a notice and can be reset', async ({ page }) => {
   await seed(page, '{broken');
-  await page.goto('/');
+  await page.goto('./');
   await openAbout(page);
   await expect(page.getByText('הנתונים השמורים אינם תקינים')).toBeVisible();
   await expect(page.getByTestId('best')).toHaveText('אין נתונים');
@@ -150,7 +150,7 @@ test('a long history scrolls vertically without horizontal overflow', async ({ p
     result: 'loss',
   }));
   await seed(page, games(many));
-  await page.goto('/');
+  await page.goto('./');
   await openAbout(page);
   await expect(historyRows(page)).toHaveCount(30);
   const { scrollWidth, clientWidth, scrollHeight, innerHeight } = await page.evaluate(() => ({
