@@ -6,6 +6,8 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* Disable double-tap zoom (fast repeated taps on a tile); pinch-zoom still works. */
+  touch-action: manipulation;
 }
 
 body {

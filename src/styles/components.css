@@ -163,6 +163,11 @@
 
 .tile {
   aspect-ratio: 1;
+  touch-action: manipulation;
+  /* Rapid taps must not select the tile label or open the iOS callout. */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
   min-width: 0;
   border: 2px solid var(--charcoal);
   border-radius: var(--radius-tile);
