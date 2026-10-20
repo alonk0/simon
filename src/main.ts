@@ -6,20 +6,41 @@ import './styles/base.css';
 import './styles/components.css';
 
 import { createSound } from './audio/sound';
-import { createGameController } from './game/gameController';
+import { createGameController, type FinishSummary, type GameOutcome } from './game/gameController';
+import { computeStatistics } from './game/statistics';
 import { createNavigation, type Screen } from './navigation';
 import { createAboutScreen } from './ui/aboutScreen';
 import { createHomeScreen, type HomeScreen } from './ui/homeScreen';
+import { createResultsRepository } from './storage/resultsRepository';
 
 const app = document.getElementById('app');
 if (!app) throw new Error('Missing #app root');
 
 const nav = createNavigation('home');
 const sound = createSound();
+const results = createResultsRepository();
+
+// Records a finished game and derives the personal best shown in the end-of-game modal.
+function recordFinishedGame(outcome: GameOutcome): FinishSummary {
+  const before = results.load();
+  const previousBest = before.status === 'ok' ? computeStatistics(before.games).personalBest : null;
+  const recorded = results.record(outcome);
+  if (recorded.saved) {
+    return {
+      saved: true,
+      personalBest: computeStatistics(recorded.games).personalBest,
+      isNewBest: outcome.completedRounds > (previousBest ?? 0),
+    };
+  }
+  // Not saved: show only the stored best, never one that includes the unsaved result.
+  return { saved: false, personalBest: previousBest, isNewBest: false };
+}
+
 let home: HomeScreen | undefined;
 const controller = createGameController({
   playTone: (color, durationMs) => sound.play(color, durationMs),
   onChange: (state) => home?.render(state),
+  onFinish: recordFinishedGame,
 });
 home = createHomeScreen(nav, controller, sound);
 

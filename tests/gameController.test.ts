@@ -178,3 +178,76 @@ describe('game controller', () => {
     expect(game.getState()).toMatchObject({ phase: 'between-rounds', completedRounds: 1 });
   });
 });
+
+describe('game controller – finishing', () => {
+  const SUMMARY = { saved: true, personalBest: 6, isNewBest: true };
+
+  function setupWithFinish(onFinish = vi.fn(() => SUMMARY)) {
+    const game = createGameController({ random: cyclingRandom(), playTone: vi.fn(), onChange: () => {}, onFinish });
+    const pressAll = () => {
+      for (const color of game.getSequence()) game.press(color);
+    };
+    const completeRounds = (n: number) => {
+      for (let r = 1; r <= n; r++) {
+        vi.advanceTimersByTime(playbackMs(r));
+        pressAll();
+        if (r < 10) vi.advanceTimersByTime(BETWEEN_ROUNDS_MS);
+      }
+    };
+    return { game, onFinish, completeRounds };
+  }
+
+  it('reports a loss exactly once and shows the summary', () => {
+    const { game, onFinish, completeRounds } = setupWithFinish();
+    game.start();
+    completeRounds(6);
+    vi.advanceTimersByTime(playbackMs(7));
+    const wrong = COLORS.find((c) => c !== game.getSequence()[0])!;
+    game.press(wrong);
+    game.press(wrong);
+    vi.advanceTimersByTime(10_000);
+    expect(onFinish).toHaveBeenCalledTimes(1);
+    expect(onFinish).toHaveBeenCalledWith({ result: 'loss', completedRounds: 6 });
+    expect(game.getState()).toMatchObject({ phase: 'finished', summary: SUMMARY });
+  });
+
+  it('reports a win exactly once with 10 rounds', () => {
+    const { game, onFinish, completeRounds } = setupWithFinish();
+    game.start();
+    completeRounds(10);
+    game.press('blue');
+    expect(onFinish).toHaveBeenCalledTimes(1);
+    expect(onFinish).toHaveBeenCalledWith({ result: 'win', completedRounds: 10 });
+  });
+
+  it('does not report a cancelled game', () => {
+    const { game, onFinish, completeRounds } = setupWithFinish();
+    game.start();
+    completeRounds(3);
+    game.cancel();
+    vi.advanceTimersByTime(60_000);
+    expect(onFinish).not.toHaveBeenCalled();
+    expect(game.getState().summary).toBeNull();
+  });
+
+  it('still finishes when recording throws', () => {
+    const { game } = setupWithFinish(
+      vi.fn(() => {
+        throw new Error('storage broken');
+      }),
+    );
+    game.start();
+    vi.advanceTimersByTime(playbackMs(1));
+    game.press(COLORS.find((c) => c !== game.getSequence()[0])!);
+    expect(game.getState()).toMatchObject({ phase: 'finished', result: 'loss', completedRounds: 0, summary: null });
+  });
+
+  it('clears the summary when a new game starts', () => {
+    const { game } = setupWithFinish();
+    game.start();
+    vi.advanceTimersByTime(playbackMs(1));
+    game.press(COLORS.find((c) => c !== game.getSequence()[0])!);
+    game.start();
+    expect(game.getState().summary).toBeNull();
+  });
+});

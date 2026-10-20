@@ -73,12 +73,18 @@ export function createHomeScreen(nav: Navigation, controller: GameController, so
   // End-of-game modal (an overlay inside the home screen, not a separate screen).
   const resultTitle = el('h2', { class: 'modal__title', id: 'result-title' });
   const resultRounds = el('p', { class: 'modal__text' });
+  const resultBest = el('p', { class: 'modal__text' });
+  const newBestBadge = el('p', { class: 'modal__badge' }, ['שיא חדש!']);
+  const notSavedNote = el('p', { class: 'modal__note' }, ['התוצאה לא נשמרה במכשיר']);
   const playAgainButton = el('button', { type: 'button', class: 'btn btn--primary btn--block' }, ['שחק שוב']);
   playAgainButton.addEventListener('click', startGame);
   const modal = el('div', { class: 'overlay', hidden: true }, [
     el('div', { class: 'modal', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'result-title' }, [
       resultTitle,
       resultRounds,
+      resultBest,
+      newBestBadge,
+      notSavedNote,
       playAgainButton,
     ]),
   ]);
@@ -118,6 +124,11 @@ export function createHomeScreen(nav: Navigation, controller: GameController, so
     if (showModal && modal.hidden) {
       resultTitle.textContent = state.result === 'win' ? 'ניצחת! 🎉' : 'הפסדת';
       resultRounds.textContent = completedText(state.completedRounds);
+      const best = state.summary?.personalBest ?? null;
+      resultBest.hidden = best === null;
+      resultBest.textContent = best === null ? '' : `שיא אישי: ${best}`;
+      newBestBadge.hidden = !state.summary?.isNewBest;
+      notSavedNote.hidden = state.summary?.saved !== false;
       modal.hidden = false;
       playAgainButton.focus();
     } else if (!showModal) {

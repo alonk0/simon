@@ -10,12 +10,26 @@ export type GameState = {
   completedRounds: number;
   litColor: Color | null;
   result: 'win' | 'loss' | null;
+  summary: FinishSummary | null;
+};
+
+export type GameOutcome = {
+  result: 'win' | 'loss';
+  completedRounds: number;
+};
+
+// Saved-results info shown in the end-of-game modal.
+export type FinishSummary = {
+  saved: boolean;
+  personalBest: number | null;
+  isNewBest: boolean;
 };
 
 export type GameControllerOptions = {
   random?: Random;
   playTone: (color: Color, durationMs: number) => void;
   onChange: (state: GameState) => void;
+  onFinish?: (outcome: GameOutcome) => FinishSummary;
 };
 
 export type GameController = {
@@ -26,9 +40,9 @@ export type GameController = {
   getSequence(): readonly Color[];
 };
 
-const IDLE: GameState = { phase: 'idle', round: 0, completedRounds: 0, litColor: null, result: null };
+const IDLE: GameState = { phase: 'idle', round: 0, completedRounds: 0, litColor: null, result: null, summary: null };
 
-export function createGameController({ random = Math.random, playTone, onChange }: GameControllerOptions): GameController {
+export function createGameController({ random = Math.random, playTone, onChange, onFinish }: GameControllerOptions): GameController {
   let state: GameState = { ...IDLE };
   let sequence: Color[] = [];
   let inputIndex = 0;
@@ -86,7 +100,14 @@ export function createGameController({ random = Math.random, playTone, onChange 
 
   const finish = (result: 'win' | 'loss') => {
     clearTimers();
-    update({ phase: 'finished', result, litColor: null });
+    // Called exactly once per finished game; cancelled games never reach here.
+    let summary: FinishSummary | null = null;
+    try {
+      summary = onFinish?.({ result, completedRounds: state.completedRounds }) ?? null;
+    } catch {
+      // Storage problems must never block showing the result.
+    }
+    update({ phase: 'finished', result, litColor: null, summary });
   };
 
   return {
